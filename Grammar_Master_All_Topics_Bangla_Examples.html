@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Master</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,"Noto Sans Bengali",sans-serif;
+    background:#f1fff5;
+    color:#222;
+}
+
+header{
+    background:#19c85b;color:white;padding:42px 38px 38px;text-align:left;border-radius:0 0 34px 34px;
+}
+
+header h1{
+    margin:0;
+    font-size:36px;
+}
+
+header p{
+    margin:12px 0 0;
+    font-size:19px;
+}
+
+.container{padding:18px;max-width:760px;margin:auto;}
+.search-box{width:100%;padding:16px 18px;border:2px solid #d8eee4;border-radius:18px;font-size:17px;outline:none;margin-top:12px;background:white;}
+.search-box:focus{border-color:#19a68f;}
+.topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.topic-box{background:white;min-height:190px;padding:22px 14px;border-radius:26px;box-shadow:0 5px 20px #00000012;text-align:center;cursor:pointer;transition:.15s;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+.topic-box:active{transform:scale(.97);}
+.topic-icon{font-size:54px;line-height:1.1;margin-bottom:12px;}
+.topic-box h2{margin:0 0 8px;color:#222;font-size:25px;}
+.topic-count{color:#777;font-size:18px;margin:0;}
+@media(max-width:520px){.topic-box{min-height:175px}.topic-box h2{font-size:21px}.topic-icon{font-size:48px}}
+
+.card{
+    background:white;
+    margin:15px 0;
+    padding:20px;
+    border-radius:22px;
+    box-shadow:0 5px 20px #00000012;
+}
+
+.card h2{
+    color:#159b88;
+    margin-top:0;
+}
+
+.tense-card{
+    cursor:pointer;
+    transition:.2s;
+}
+
+.tense-card:active{
+    transform:scale(.97);
+}
+
+.formula{
+    background:#e3f8f2;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
+    color:#087f6e;
+}
+
+.example{
+    background:#fff8dc;
+    padding:14px;
+    border-radius:15px;
+    margin:10px 0;
+}
+
+.example b{
+    color:#159b88;
+}
+
+.bn{
+    display:block;
+    margin-top:6px;
+    color:#555;
+}
+
+button{
+    border:0;
+    padding:14px 20px;
+    border-radius:14px;
+    background:#159f8a;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    margin:5px 0;
+}
+
+.back{
+    background:#777;
+}
+
+.quiz-option{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#f5f5f5;
+    color:#222;
+    border:2px solid #ddd;
+    margin:10px 0;
+}
+
+.quiz-option.correct{
+    background:#b8f5c7;
+    border-color:#20a84d;
+}
+
+.quiz-option.wrong{
+    background:#ffc5c5;
+    border-color:#e33;
+}
+
+.score{
+    background:#e3f8f2;
+    padding:15px;
+    border-radius:15px;
+    font-size:20px;
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.hidden{
+    display:none;
+}
+
+.progress{
+    height:12px;
+    background:#cdebdc;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-bar{
+    height:100%;
+    background:#20b86a;
+    width:0%;
+}
+
+.home-btn{
+    width:100%;
+    margin-top:10px;
+}
+
+.subtitle{
+    color:#666;
+    line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>📚 Grammar Master</h1>
+<p>Learn English Grammar Step by Step</p>
+</header>
+
+<div class="container">
+
+<!-- HOME -->
+<div id="home">
+
+<div class="card">
+<h2>📊 Today's Progress</h2>
+<p id="progressText">0 out of 105 questions completed.</p>
+<input id="searchBox" class="search-box" type="search" placeholder="🔎 Search grammar topic..." oninput="filterTopics()">
+
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+</div>
+
+<div id="topicList"></div>
+
+</div>
+
+
+<!-- TENSE DETAIL -->
+<div id="detail" class="hidden">
+
+<button class="back" onclick="goHome()">← Back</button>
+
+<div id="detailContent"></div>
+
+<button class="home-btn" onclick="startQuiz()">
+🎯 Practice This Tense
+</button>
+
+</div>
+
+
+<!-- QUIZ -->
+<div id="quiz" class="hidden">
+
+<button class="back" onclick="showDetail()">← Back</button>
+
+<div class="score" id="quizScore">
+Score: 0
+</div>
+
+<div class="card">
+
+<h2 id="questionNumber"></h2>
+
+<h2 id="questionText"></h2>
+
+<div id="options"></div>
+
+<p id="answerMessage"></p>
+
+<button id="nextBtn" class="hidden" onclick="nextQuestion()">
+Next Question →
+</button>
+
+</div>
+
+</div>
+
+
+<!-- RESULT -->
+<div id="result" class="hidden">
+
+<div class="card">
+
+<h2>🏆 Quiz Complete!</h2>
+
+<div class="score" id="finalScore"></div>
+
+<p id="resultMessage"></p>
+
+<button class="home-btn" onclick="showDetail()">
+🔄 Try Again
+</button>
+
+<button class="home-btn" onclick="goHome()">
+🏠 Home
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+const tenses = [
+
+{
+name:"Simple Present Tense",
+short:"অভ্যাস, সাধারণ সত্য ও নিয়মিত কাজ",
+definition:"The Simple Present Tense describes habits, regular actions, general truths and facts.",
+bangla:"Simple Present Tense ব্যবহার করা হয় নিয়মিত কাজ, অভ্যাস, সাধারণ সত্য এবং চিরন্তন সত্য বোঝাতে।",
+formula:"Subject + V1 / V1+s/es",
+
+examples:[
+["I go to school every day.","আমি প্রতিদিন স্কুলে যাই।"],
+["She reads a book every day.","সে প্রতিদিন একটি বই পড়ে।"],
+["He plays football.","সে ফুটবল খেলে।"],
+["They live in Dhaka.","তারা ঢাকায় থাকে।"],
+["The sun rises in the east.","সূর্য পূর্ব দিকে ওঠে।"],
+["Water boils at 100°C.","পানি ১০০ ডিগ্রি সেলসিয়াসে ফুটে।"]
+],
+
+questions:[
+["She ___ to school every day.",["go","goes","going","went"],1],
+["The sun ___ in the east.",["rise","rises","rising","rose"],1],
+["I ___ tea every morning.",["drink","drinks","drank","drinking"],0],
+["He ___ football every Friday.",["play","plays","played","playing"],1],["Birds ___ in the sky.",["fly","flies","flew","flying"],0]]
+},
+
+{
+name:"Present Continuous Tense",
+short:"বর্তমানে চলমান কাজ",
+definition:"The Present Continuous Tense describes an action happening now.",
+bangla:"বর্তমানে যে কাজটি এই মুহূর্তে চলছে তা বোঝাতে Present Continuous Tense ব্যবহার করা হয়।",
+formula:"Subject + am/is/are + V-ing",
+
+examples:[
+["I am reading a book.","আমি একটি বই পড়ছি।"],
+["She is cooking food.","সে খাবার রান্না করছে।"],
+["They are playing football.","তারা ফুটবল খেলছে।"],
+["He is writing a letter.","সে একটি চিঠি লিখছে।"],
+["We are watching television.","আমরা টেলিভিশন দেখছি।"],
+["The baby is sleeping.","শিশুটি ঘুমাচ্ছে।"]
+],
+
+questions:[
+["I ___ a book now.",["read","reads","am reading","readed"],2],
+["She ___ food now.",["is cooking","cook","cooks","cooked"],0],
+["They ___ football.",["play","are playing","played","plays"],1],
+["We ___ English now.",["study","are studying","studied","studies"],1],["He ___ TV at the moment.",["is watching","watch","watched","watches"],0]]
+},
+
+{
+name:"Present Perfect Tense",
+short:"সম্পন্ন কাজ যার বর্তমানের সাথে সম্পর্ক আছে",
+definition:"The Present Perfect Tense describes an action that has been completed with a connection to the present.",
+bangla:"যে কাজ সম্পন্ন হয়েছে কিন্তু তার ফলাফল বা সম্পর্ক বর্তমানের সাথে আছে, তা বোঝাতে Present Perfect Tense ব্যবহার করা হয়।",
+formula:"Subject + has/have + V3",
+
+examples:[
+["I have finished my work.","আমি আমার কাজ শেষ করেছি।"],
+["She has eaten breakfast.","সে সকালের নাশতা খেয়েছে।"],
+["He has gone home.","সে বাড়ি চলে গেছে।"],
+["They have completed the task.","তারা কাজটি সম্পন্ন করেছে।"],
+["We have seen this movie.","আমরা এই সিনেমাটি দেখেছি।"],
+["Rahim has bought a new phone.","রহিম একটি নতুন ফোন কিনেছে।"]
+],
+
+questions:[
+["I ___ my work.",["have finished","has finished","finish","finished"],0],
+["She ___ the book.",["have read","has read","readed","reading"],1],
+["They ___ the task.",["has completed","have completed","complete","completed"],1],
+["We ___ the movie already.",["have watched","has watched","watch","watched"],0],["He ___ his homework.",["has finished","have finish","finishes","finished"],0]]
+},
+
+{
+name:"Present Perfect Continuous Tense",
+short:"অতীত থেকে শুরু হয়ে এখনো চলছে",
+definition:"The Present Perfect Continuous Tense describes an action that started in the past and is still continuing.",
+bangla:"অতীতে শুরু হওয়া কোনো কাজ এখনো চলছে—এমন কাজ বোঝাতে Present Perfect Continuous Tense ব্যবহার করা হয়।",
+formula:"Subject + has/have been + V-ing",
+
+examples:[
+["I have been reading for two hours.","আমি দুই ঘণ্টা ধরে পড়ছি।"],
+["She has been cooking since morning.","সে সকাল থেকে রান্না করছে।"],
+["They have been playing for an hour.","তারা এক ঘণ্টা ধরে খেলছে।"],
+["He has been working since morning.","সে সকাল থেকে কাজ করছে।"],
+["We have been waiting for you.","আমরা তোমার জন্য অপেক্ষা করছি।"],
+["It has been raining since noon.","দুপুর থেকে বৃষ্টি হচ্ছে।"]
+],
+
+questions:[
+["I ___ for two hours.",["have been reading","has been reading","am read","read"],0],
+["She ___ since morning.",["have been cooking","has been cooking","cooked","cooks"],1],
+["They ___ for an hour.",["has been playing","have been playing","play","played"],1],
+["He ___ for two hours.",["has been working","have been working","worked","works"],0],["We ___ here since morning.",["have been waiting","has been waiting","waited","wait"],0]]
+},
+
+{
+name:"Simple Past Tense",
+short:"অতীতে সম্পন্ন কাজ",
+definition:"The Simple Past Tense describes an action that happened and finished in the past.",
+bangla:"অতীতে কোনো কাজ সম্পন্ন হয়েছে বোঝাতে Simple Past Tense ব্যবহার করা হয়।",
+formula:"Subject + V2",
+
+examples:[
+["I went to school yesterday.","আমি গতকাল স্কুলে গিয়েছিলাম।"],
+["She cooked dinner.","সে রাতের খাবার রান্না করেছিল।"],
+["He played football.","সে ফুটবল খেলেছিল।"],
+["They visited Dhaka.","তারা ঢাকা ভ্রমণ করেছিল।"],
+["We watched a movie.","আমরা একটি সিনেমা দেখেছিলাম।"],
+["Rahim bought a book.","রহিম একটি বই কিনেছিল।"]
+],
+
+questions:[
+["I ___ to school yesterday.",["go","goes","went","going"],2],
+["She ___ dinner.",["cook","cooks","cooked","cooking"],2],
+["They ___ Dhaka last year.",["visit","visited","visits","visiting"],1],
+["He ___ home last night.",["go","goes","went","going"],2],["We ___ the match yesterday.",["watch","watched","watches","watching"],1]]
+},
+
+{
+name:"Past Continuous Tense",
+short:"অতীতে কোনো নির্দিষ্ট সময়ে চলমান কাজ",
+definition:"The Past Continuous Tense describes an action that was happening at a particular time in the past.",
+bangla:"অতীতে কোনো নির্দিষ্ট সময়ে কোনো কাজ চলছিল বোঝাতে Past Continuous Tense ব্যবহার করা হয়।",
+formula:"Subject + was/were + V-ing",
+
+examples:[
+["I was reading a book.","আমি একটি বই পড়ছিলাম।"],
+["She was cooking.","সে রান্না করছিল।"],
+["They were playing football.","তারা ফুটবল খেলছিল।"],
+["He was sleeping.","সে ঘুমাচ্ছিল।"],
+["We were watching TV.","আমরা টিভি দেখছিলাম।"],
+["It was raining.","বৃষ্টি হচ্ছিল।"]
+],
+
+questions:[
+["I ___ a book.",["was reading","were reading","read","am reading"],0],
+["They ___ football.",["was playing","were playing","play","played"],1],
+["She ___ dinner.",["were cooking","was cooking","cooked","cook"],1],
+["He ___ when I called.",["was sleeping","were sleeping","slept","sleeps"],0],["We ___ dinner at 8 PM.",["was eating","were eating","eat","ate"],1]]
+},
+
+{
+name:"Past Perfect Tense",
+short:"অতীতে একটি কাজের আগে আরেকটি কাজ সম্পন্ন",
+definition:"The Past Perfect Tense describes an action that had already happened before another past action.",
+bangla:"অতীতে দুটি কাজের মধ্যে যে কাজটি আগে সম্পন্ন হয়েছিল তা বোঝাতে Past Perfect Tense ব্যবহার করা হয়।",
+formula:"Subject + had + V3",
+
+examples:[
+["I had finished my work before he came.","সে আসার আগে আমি আমার কাজ শেষ করেছিলাম।"],
+["She had eaten before we arrived.","আমরা আসার আগে সে খেয়ে নিয়েছিল।"],
+["They had left the place.","তারা জায়গাটি ছেড়ে গিয়েছিল।"],
+["He had completed the task.","সে কাজটি সম্পন্ন করেছিল।"],
+["We had seen the movie.","আমরা সিনেমাটি দেখেছিলাম।"],
+["Rahim had gone home.","রহিম বাড়ি চলে গিয়েছিল।"]
+],
+
+questions:[
+["I ___ my work before he came.",["finish","had finished","have finished","finishing"],1],
+["She ___ before we arrived.",["had eaten","eat","eats","has eaten"],0],
+["They ___ the place.",["had left","leave","leaves","leaving"],0],
+["He ___ before I arrived.",["had left","has left","leaves","left"],0],["We ___ the work before noon.",["had finished","have finished","finish","finishing"],0]]
+},
+
+{
+name:"Past Perfect Continuous Tense",
+short:"অতীতে কোনো সময়ের আগে থেকে চলমান কাজ",
+definition:"The Past Perfect Continuous Tense describes an action that had been continuing before another past event.",
+bangla:"অতীতে অন্য একটি ঘটনা ঘটার আগে কোনো কাজ কিছু সময় ধরে চলছিল বোঝাতে এটি ব্যবহার করা হয়।",
+formula:"Subject + had been + V-ing",
+
+examples:[
+["I had been reading for two hours.","আমি দুই ঘণ্টা ধরে পড়ছিলাম।"],
+["She had been cooking since morning.","সে সকাল থেকে রান্না করছিল।"],
+["They had been playing for an hour.","তারা এক ঘণ্টা ধরে খেলছিল।"],
+["He had been working all day.","সে সারাদিন ধরে কাজ করছিল।"],
+["We had been waiting for you.","আমরা তোমার জন্য অপেক্ষা করছিলাম।"],
+["It had been raining for hours.","কয়েক ঘণ্টা ধরে বৃষ্টি হচ্ছিল।"]
+],
+
+questions:[
+["I ___ for two hours.",["had been reading","have been reading","was read","read"],0],
+["She ___ since morning.",["had been cooking","has cooked","cooks","cooked"],0],
+["They ___ for an hour.",["had been playing","have play","played","play"],0],
+["He ___ for an hour before lunch.",["had been studying","has been studying","studied","studies"],0],["We ___ for two hours before the bus came.",["had been waiting","have waited","wait","waited"],0]]
+},
+
+{
+name:"Simple Future Tense",
+short:"ভবিষ্যতে সংঘটিত কাজ",
+definition:"The Simple Future Tense describes an action that will happen in the future.",
+bangla:"ভবিষ্যতে কোনো কাজ হবে বা ঘটবে বোঝাতে Simple Future Tense ব্যবহার করা হয়।",
+formula:"Subject + will + V1",
+
+examples:[
+["I will go to school tomorrow.","আমি আগামীকাল স্কুলে যাব।"],
+["She will help me.","সে আমাকে সাহায্য করবে।"],
+["He will buy a car.","সে একটি গাড়ি কিনবে।"],
+["They will visit us.","তারা আমাদের দেখতে আসবে।"],
+["We will play football.","আমরা ফুটবল খেলব।"],
+["I will call you later.","আমি পরে তোমাকে ফোন করব।"]
+],
+
+questions:[
+["I ___ tomorrow.",["go","went","will go","going"],2],
+["She ___ me.",["will help","helps","helped","helping"],0],
+["They ___ us.",["visit","visited","will visit","visiting"],2],
+["He ___ tomorrow.",["will come","came","comes","coming"],0],["We ___ you later.",["call","called","will call","calling"],2]]
+},
+
+{
+name:"Future Continuous Tense",
+short:"ভবিষ্যতের নির্দিষ্ট সময়ে চলমান কাজ",
+definition:"The Future Continuous Tense describes an action that will be happening at a particular time in the future.",
+bangla:"ভবিষ্যতে কোনো নির্দিষ্ট সময়ে কোনো কাজ চলতে থাকবে বোঝাতে Future Continuous Tense ব্যবহার করা হয়।",
+formula:"Subject + will be + V-ing",
+
+examples:[
+["I will be studying at 8 PM.","রাত ৮টায় আমি পড়তে থাকব।"],
+["She will be cooking dinner.","সে রাতের খাবার রান্না করতে থাকবে।"],
+["They will be playing football.","তারা ফুটবল খেলতে থাকবে।"],
+["He will be working tomorrow morning.","সে আগামীকাল সকালে কাজ করতে থাকবে।"],
+["We will be travelling next week.","আমরা আগামী সপ্তাহে ভ্রমণ করতে থাকব।"],
+["I will be waiting for you.","আমি তোমার জন্য অপেক্ষা করতে থাকব।"]
+],
+
+questions:[
+["I ___ at 8 PM.",["study","will be studying","studied","am study"],1],
+["They ___ football.",["will be playing","play","played","playing"],0],
+["She ___ dinner.",["will cooking","will be cooking","cooked","cooks"],1],
+["At 9 PM, I ___.",["will be studying","study","studied","am study"],0],["Tomorrow morning, she ___.",["will be working","worked","works","working"],0]]
+},
+
+{
+name:"Future Perfect Tense",
+short:"ভবিষ্যতের নির্দিষ্ট সময়ের আগে সম্পন্ন কাজ",
+definition:"The Future Perfect Tense describes an action that will have been completed before a certain future time.",
+bangla:"ভবিষ্যতের কোনো নির্দিষ্ট সময়ের মধ্যে কোনো কাজ সম্পন্ন হয়ে যাবে বোঝাতে Future Perfect Tense ব্যবহার করা হয়।",
+formula:"Subject + will have + V3",
+
+examples:[
+["I will have finished my work by tomorrow.","আগামীকালের মধ্যে আমি আমার কাজ শেষ করে ফেলব।"],
+["She will have completed the course.","সে কোর্সটি শেষ করে ফেলবে।"],
+["They will have arrived by noon.","দুপুরের মধ্যে তারা পৌঁছে যাবে।"],
+["He will have finished the book.","সে বইটি শেষ করে ফেলবে।"],
+["We will have reached home.","আমরা বাড়িতে পৌঁছে যাব।"],
+["You will have learned the lesson.","তুমি পাঠটি শিখে ফেলবে।"]
+],
+
+questions:[
+["I ___ my work by tomorrow.",["will finish","will have finished","finished","have finished"],1],
+["She ___ the course.",["will have completed","completed","completes","has completed"],0],
+["They ___ by noon.",["arrive","arrived","will have arrived","arriving"],2],
+["By next week, I ___.",["will have finished","finish","finished","am finishing"],0],["By 6 PM, she ___.",["will have arrived","arrives","arrived","arriving"],0]]
+},
+
+{
+name:"Future Perfect Continuous Tense",
+short:"ভবিষ্যতের নির্দিষ্ট সময় পর্যন্ত চলমান কাজ",
+definition:"The Future Perfect Continuous Tense describes an action that will have been continuing for a period of time up to a future point.",
+bangla:"ভবিষ্যতের কোনো নির্দিষ্ট সময় পর্যন্ত কোনো কাজ কত সময় ধরে চলতে থাকবে তা বোঝাতে Future Perfect Continuous Tense ব্যবহার করা হয়।",
+formula:"Subject + will have been + V-ing",
+
+examples:[
+["I will have been studying for three hours.","আমি তিন ঘণ্টা ধরে পড়তে থাকব।"],
+["She will have been working since morning.","সে সকাল থেকে কাজ করতে থাকবে।"],
+["They will have been playing for two hours.","তারা দুই ঘণ্টা ধরে খেলতে থাকবে।"],
+["He will have been living here for ten years.","সে এখানে দশ বছর ধরে বসবাস করতে থাকবে।"],
+["We will have been travelling for a week.","আমরা এক সপ্তাহ ধরে ভ্রমণ করতে থাকব।"],
+["It will have been raining for hours.","কয়েক ঘণ্টা ধরে বৃষ্টি হতে থাকবে।"]
+],
+
+questions:[
+["I ___ for three hours.",["will have been studying","will study","studied","have studied"],0],
+["She ___ since morning.",["will have been working","worked","works","has worked"],0],
+["They ___ for two hours.",["will have played","will have been playing","play","played"],1],
+["By noon, he ___ for four hours.",["will have been working","will work","worked","has worked"],0],["By next month, we ___ here for a year.",["will have been living","will live","lived","have lived"],0]]
+
+}
+
+];
+
+const topics = [
+{id:"tense",name:"📚 Tense",title:"Tense",short:"১২টি Tense — Definition, বাংলা ব্যাখ্যা, Formula, Examples ও Practice",type:"tense"},
+{id:"parts",name:"🔤 Parts of Speech",title:"Parts of Speech",short:"ইংরেজি ভাষার ৮টি Parts of Speech",lessons:[
+["Noun","ব্যক্তি, স্থান, বস্তু বা ধারণার নামকে Noun বলে।","Rahim, school, book, honesty"],
+["Pronoun","Noun-এর পরিবর্তে ব্যবহৃত word-কে Pronoun বলে।","I, you, he, she, they"],
+["Verb","কাজ বা অবস্থা বোঝায় এমন word-কে Verb বলে।","go, eat, read, is"],
+["Adjective","Noun বা Pronoun-এর গুণ বা অবস্থা বোঝায়।","good, beautiful, five"],
+["Adverb","Verb, Adjective বা অন্য Adverb সম্পর্কে অতিরিক্ত তথ্য দেয়।","slowly, very, carefully"],
+["Preposition","Noun/Pronoun-এর সঙ্গে অন্য word-এর সম্পর্ক বোঝায়।","in, on, at, under"],
+["Conjunction","Word, phrase বা clause-কে যুক্ত করে।","and, but, because"],
+["Interjection","হঠাৎ আবেগ বা অনুভূতি প্রকাশ করে।","Wow!, Hurrah!, Alas!"]],questions:[
+["Rahim is a student. 'Rahim' is a ___.",["Noun","Verb","Adverb","Conjunction"],0],
+["She runs quickly. 'quickly' is an ___.",["Noun","Adverb","Adjective","Pronoun"],1],
+["He is a good boy. 'good' is an ___.",["Verb","Preposition","Adjective","Interjection"],2],
+["Honesty is the best policy. 'Honesty' is a ___.",["Noun","Verb","Adverb","Pronoun"],0],["She is very beautiful. 'very' is an ___.",["Adverb","Noun","Verb","Conjunction"],0]]},
+{id:"voice",name:"🎤 Voice",title:"Voice",short:"Active ও Passive Voice-এর নিয়ম ও Practice",lessons:[
+["Active Voice","যে বাক্যে Subject নিজে কাজ করে তাকে Active Voice বলে।","Rahim writes a letter."],
+["Passive Voice","যে বাক্যে কাজের ওপর গুরুত্ব দেওয়া হয় তাকে Passive Voice বলে।","A letter is written by Rahim."],
+["Simple Present","Active: Subject + V1 + Object","Passive: Object + am/is/are + V3 + by + Subject"],
+["Simple Past","Active: Subject + V2 + Object","Passive: Object + was/were + V3 + by + Subject"],
+["Simple Future","Active: Subject + will + V1 + Object","Passive: Object + will be + V3 + by + Subject"]],questions:[
+["He writes a letter. Passive is ___.",["A letter is written by him.","A letter was written by him.","A letter is writing by him.","A letter has written by him."],0],
+["They played football. Passive is ___.",["Football is played by them.","Football was played by them.","Football were played by them.","Football has played by them."],1],
+["She will do the work. Passive is ___.",["The work is done by her.","The work was done by her.","The work will be done by her.","The work will done by her."],2],
+["The teacher teaches English. Passive is ___.",["English is taught by the teacher.","English was taught by the teacher.","English teaches the teacher.","English is teaching by the teacher."],0],["The boy broke the window. Passive is ___.",["The window is broken by the boy.","The window was broken by the boy.","The window has broken by the boy.","The window broke the boy."],1]]},
+{id:"narration",name:"🗣️ Narration",title:"Narration",short:"Direct ও Indirect Speech-এর নিয়ম ও Practice",lessons:[
+["Direct Speech","কথকের বক্তব্য হুবহু quotation-এর মধ্যে প্রকাশ করলে Direct Speech হয়।","He said, “I am happy.”"],
+["Indirect Speech","কথকের বক্তব্য নিজের ভাষায় প্রকাশ করলে Indirect Speech হয়।","He said that he was happy."],
+["Pronoun Change","প্রয়োজন অনুযায়ী Pronoun পরিবর্তিত হতে পারে।","I → he/she, we → they"],
+["Tense Change","Past reporting verb হলে প্রয়োজন অনুযায়ী tense এক ধাপ পিছোতে পারে।","am → was, have → had, will → would"],
+["Time Word Change","সময় নির্দেশক শব্দ পরিবর্তিত হতে পারে।","today → that day, tomorrow → the next day"]],questions:[
+["He said, “I am busy.”",["He said that he was busy.","He said that I am busy.","He says that he was busy.","He said that he is busy."],0],
+["She said, “I have finished.”",["She said that she has finished.","She said that she had finished.","She said that I had finished.","She says that she had finished."],1],
+["He said, “I will go.”",["He said that he would go.","He said that he will went.","He said that I would go.","He says that he would go."],0],
+["She said, “I am tired.”",["She said that she was tired.","She said that I was tired.","She says that she is tired.","She said that she is tired."],0],["He said, “I can swim.”",["He said that he could swim.","He said that I could swim.","He says that he can swam.","He said that he can swim."],0]]},
+{id:"article",name:"📖 Article",title:"Article",short:"A, An এবং The-এর ব্যবহার",lessons:[
+["A","ব্যঞ্জনধ্বনি দিয়ে শুরু হওয়া singular countable noun-এর আগে সাধারণত a বসে।","a book, a boy, a university"],
+["An","স্বরধ্বনি দিয়ে শুরু হওয়া singular countable noun-এর আগে সাধারণত an বসে।","an apple, an egg, an hour"],
+["The","নির্দিষ্ট ব্যক্তি বা বস্তুর আগে the বসে।","the sun, the book on the table"],
+["Zero Article","কিছু plural বা uncountable noun সাধারণ অর্থে article ছাড়াই ব্যবহৃত হয়।","Books are useful. Water is essential."]],questions:[
+["I have ___ apple.",["a","an","the","no article"],1],
+["He is ___ university student.",["a","an","the","no article"],0],
+["___ sun rises in the east.",["A","An","The","No article"],2],
+["He is ___ honest man.",["a","an","the","no article"],1],["I saw ___ moon last night.",["a","an","the","no article"],2]]},
+{id:"preposition",name:"📍 Preposition",title:"Preposition",short:"in, on, at, by, with, from, to ইত্যাদির ব্যবহার",lessons:[
+["In","বড় স্থান, মাস, বছর বা দীর্ঘ সময়ের ক্ষেত্রে in ব্যবহৃত হয়।","in Dhaka, in January, in 2026"],
+["On","দিন, তারিখ বা surface-এর ক্ষেত্রে on ব্যবহৃত হয়।","on Monday, on the table"],
+["At","নির্দিষ্ট সময় বা point-এর ক্ষেত্রে at ব্যবহৃত হয়।","at 7 o'clock, at home"],
+["From / To","শুরু ও গন্তব্য/শেষ বোঝাতে from ও to ব্যবহৃত হয়।","from Dhaka to Chittagong"],
+["By","কাজটি কে করেছে বা সময়সীমা বোঝাতে by ব্যবহৃত হয়।","written by him, by 5 PM"]],questions:[
+["I live ___ Dhaka.",["at","on","in","by"],2],
+["The book is ___ the table.",["in","on","at","from"],1],
+["The class starts ___ 9 AM.",["in","on","at","to"],2],
+["The meeting is ___ Monday.",["in","on","at","by"],1],["He arrived ___ 7 PM.",["in","on","at","from"],2]]},
+{id:"rightform",name:"✍️ Right Form of Verb",title:"Right Form of Verb",short:"Tense অনুযায়ী verb-এর সঠিক রূপ",lessons:[
+["Present Indefinite","Subject অনুযায়ী V1 অথবা V1+s/es বসে।","He goes. / They go."],
+["Present Continuous","am/is/are-এর পরে V-ing বসে।","She is reading."],
+["Past Indefinite","অতীতের কাজ হলে সাধারণত V2 বসে।","He went home."],
+["Perfect","has/have/had-এর পরে V3 বসে।","They have finished."],
+["Modal","can, may, must, should-এর পরে V1 বসে।","He can swim."]],questions:[
+["He ___ to school every day.",["go","goes","going","went"],1],
+["They are ___ football.",["play","played","playing","plays"],2],
+["She has ___ the work.",["finish","finished","finishing","finishes"],1],
+["She ___ to music every day.",["listen","listens","listening","listened"],1],["We ___ our work yesterday.",["complete","completed","completing","completes"],1]]},
+{id:"transformation",name:"🔄 Transformation",title:"Transformation",short:"Sentence Transformation-এর নিয়ম ও Practice",lessons:[
+["Affirmative → Negative","মূল অর্থ ঠিক রেখে negative করতে not বা উপযুক্ত negative form ব্যবহার করা হয়।","He is honest. → He is not dishonest."],
+["Assertive → Interrogative","বিবৃতিমূলক বাক্যকে প্রশ্নবোধক বাক্যে রূপান্তর করা হয়।","Everybody loves flowers. → Who does not love flowers?"],
+["Exclamatory → Assertive","আবেগপূর্ণ বাক্যকে সাধারণ বিবৃতিতে রূপ দেওয়া হয়।","What a beautiful flower! → It is a very beautiful flower."],
+["Degree Change","Positive, Comparative ও Superlative-এর মধ্যে অর্থ ঠিক রেখে পরিবর্তন করা হয়।","Rahim is the tallest boy. → No other boy is as tall as Rahim."]],questions:[
+["He is honest. Negative form is ___.",["He is not dishonest.","He does not honest.","He was not honest.","He is no honest."],0],
+["What a beautiful flower! Assertive form is ___.",["It is a very beautiful flower.","It is not a flower.","Is it a beautiful flower?","The flower is not beautiful."],0],
+["Rahim is the tallest boy. Positive form is ___.",["No boy is as tall as Rahim.","No other boy is as tall as Rahim.","Rahim is taller than all boys.","Rahim is not tall."],1],
+["He is too weak to walk. Equivalent form is ___.",["He is so weak that he cannot walk.","He is very weak and can walk.","He was weak to walk.","He is not weak."],0],["Nobody can deny it. Affirmative form is ___.",["Everybody can admit it.","Nobody admits it.","Can nobody deny it?","Everybody cannot deny it."],0]]},
+{id:"tag",name:"❓ Tag Question",title:"Tag Question",short:"সঠিক Question Tag বসানোর নিয়ম",lessons:[
+["Affirmative Statement","Positive statement-এর পরে সাধারণত negative tag হয়।","He is a student, isn't he?"],
+["Negative Statement","Negative statement-এর পরে সাধারণত positive tag হয়।","He isn't a student, is he?"],
+["Auxiliary Matching","Statement-এর auxiliary অনুযায়ী tag তৈরি হয়।","She can swim, can't she?"],
+["Simple Present","do/does অনুযায়ী tag তৈরি হয়।","He plays, doesn't he?"],
+["Simple Past","did অনুযায়ী tag তৈরি হয়।","They went, didn't they?"]],questions:[
+["He is a student, ___?",["is he","isn't he","does he","didn't he"],1],
+["She doesn't sing, ___?",["does she","doesn't she","is she","did she"],0],
+["They went home, ___?",["don't they","didn't they","weren't they","aren't they"],1],
+["You are ready, ___?",["aren't you","are you","don't you","didn't you"],0],["He plays cricket, ___?",["doesn't he","does he","isn't he","didn't he"],0]]},
+{id:"completing",name:"📝 Completing Sentence",title:"Completing Sentence",short:"উপযুক্ত clause দিয়ে sentence সম্পূর্ণ করার Practice",lessons:[
+["If","If-clause-এর সঙ্গে উপযুক্ত main clause ব্যবহার করতে হয়।","If you work hard, you will succeed."],
+["Unless","Unless-এর অর্থ if...not; এর পরে সাধারণত affirmative clause ব্যবহৃত হয়।","Unless you hurry, you will miss the bus."],
+["Though / Although","বিপরীত ধারণা প্রকাশ করে।","Though he is poor, he is honest."],
+["So that","উদ্দেশ্য বোঝাতে so that ব্যবহার করা হয়।","He works hard so that he can succeed."],
+["It is time","It is time-এর পরে সাধারণত subject + past form ব্যবহৃত হয়।","It is time we went home."]],questions:[
+["If you work hard, ___.",["you will succeed","you succeeded","you are succeed","you had succeed"],0],
+["Unless you hurry, ___.",["you will catch the bus","you will miss the bus","you caught the bus","you are catching yesterday"],1],
+["Though he is poor, ___.",["he is honest","he was honesty","he not honest","he is dishonesty"],0],
+["If I were rich, ___.",["I would help the poor","I will helped the poor","I help yesterday","I am poor"],0],["He worked hard so that ___.",["he could succeed","he can succeeded","he succeeds yesterday","he will success"],0]]}
+];
+
+
+let currentTopic="tense",currentTense=0,currentQuestion=0,score=0,answered=false;
+const topicList=document.getElementById("topicList");
+
+function totalQuestions(id){
+ if(id==="tense") return tenses.reduce((n,t)=>n+t.questions.length,0);
+ const t=topics.find(x=>x.id===id); return t.questions.length;
+}
+function key(id){return "gm_"+new Date().toISOString().slice(0,10)+"_"+id;}
+function correctKey(id){return key(id)+"_correct";}
+function getCorrectSet(id){
+ try{const v=JSON.parse(localStorage.getItem(correctKey(id))||"[]");return Array.isArray(v)?new Set(v):new Set();}
+ catch(e){return new Set();}
+}
+function getProgress(id){
+ const total=totalQuestions(id), set=getCorrectSet(id), done=Math.min(set.size,total);
+ return {done,total,pct:total?done/total*100:0};
+}
+function markCorrect(id,qid){
+ const set=getCorrectSet(id);
+ set.add(String(qid));
+ localStorage.setItem(correctKey(id),JSON.stringify([...set]));
+ updateProgress();
+ if(currentTopic===id){
+   const p=getProgress(id);
+   const el=document.querySelector("#detailContent .score");
+   if(el) el.innerText=`📊 ${id==="tense"?"Tense":topics.find(x=>x.id===id)?.title||id} Today's Progress: ${p.done} / ${p.total}`;
+ }
+}
+function loadHome(){
+ topicList.innerHTML=""; topicList.className="topic-grid";
+ topics.forEach(t=>{
+  const p=getProgress(t.id),d=document.createElement("div");
+  d.className="topic-box";
+  d.dataset.search=(t.name+" "+t.title+" "+t.short).toLowerCase();
+  const icon=(t.name.match(/^[^ ]+/)||["📚"])[0];
+  d.innerHTML=`<div class="topic-icon">${icon}</div><h2>${t.title}</h2><p class="topic-count">${t.id==="tense"?"12 lessons":t.lessons.length+" lessons"}</p><p class="topic-count">${p.done}/${p.total} completed</p>`;
+  d.onclick=()=>openTopic(t.id); topicList.appendChild(d);
+ });
+ updateProgress();
+}
+function filterTopics(){
+ const q=(document.getElementById("searchBox").value||"").toLowerCase().trim();
+ document.querySelectorAll("#topicList .topic-box").forEach(d=>{d.style.display=(!q||d.dataset.search.includes(q))?"flex":"none";});
+}
+function updateProgress(){
+ const total=topics.reduce((n,t)=>n+totalQuestions(t.id),0);
+ const done=topics.reduce((n,t)=>n+getProgress(t.id).done,0);
+ document.getElementById("progressText").innerText=`${done} out of ${total} questions completed today.`;
+ document.getElementById("progressBar").style.width=(total?done/total*100:0)+"%";
+}
+function openTopic(id){
+ currentTopic=id;
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("quiz").classList.add("hidden");
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("detail").classList.remove("hidden");
+ if(id==="tense") showTenseGroups(); else renderTopic(id);
+}
+function showTenseGroups(){
+ const p=getProgress("tense");
+ let h=`<div class="score">📊 Tense Today's Progress: ${p.done} / ${p.total}</div>
+ <div class="card"><h2>📚 Tense</h2><p class="subtitle">Choose a tense group</p>
+ <button class="home-btn" onclick="showTenseGroup(0)">🟢 Present Tense</button>
+ <button class="home-btn" onclick="showTenseGroup(1)">🔵 Past Tense</button>
+ <button class="home-btn" onclick="showTenseGroup(2)">🟣 Future Tense</button>
+ </div>`;
+ document.getElementById("detailContent").innerHTML=h;
+ document.querySelector("#detail > .home-btn").style.display="none";
+}
+function showTenseGroup(group){
+ const ranges=[[0,4],[4,8],[8,12]], names=["Present Tense","Past Tense","Future Tense"];
+ const [start,end]=ranges[group];
+ let h=`<div class="score">📚 ${names[group]}</div><div class="card"><h2>${names[group]}</h2>`;
+ for(let i=start;i<end;i++) h+=`<button class="home-btn" onclick="openTense(${i})">${i-start+1}. ${tenses[i].name}</button>`;
+ h+=`</div>`;
+ document.getElementById("detailContent").innerHTML=h;
+ document.querySelector("#detail > .home-btn").style.display="none";
+}
+function openTense(i){
+ currentTopic="tense";currentTense=i;
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("quiz").classList.add("hidden");
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("detail").classList.remove("hidden");
+ const t=tenses[i],p=getProgress("tense");
+ let h=`<div class="score">📊 Tense Today's Progress: ${p.done} / ${p.total}</div>
+ <div class="card"><h2>${t.name}</h2><h2>📖 Definition</h2><p>${t.definition}</p>
+ <h2>🇧🇩 বাংলা ব্যাখ্যা</h2><p>${t.bangla}</p></div>
+ <div class="card"><h2>📐 Formula</h2><div class="formula">${t.formula}</div></div>
+ <div class="card"><h2>💡 Examples</h2>`;
+ t.examples.forEach((e,n)=>h+=`<div class="example"><b>Example ${n+1}</b><div>${e[0]}</div><span class="bn">বাংলা: ${e[1]}</span></div>`);
+ document.getElementById("detailContent").innerHTML=h+"</div>";
+ document.querySelector("#detail > .home-btn").style.display="block";
+ document.querySelector("#detail > .home-btn").innerText="🎯 Practice This Tense";
+}
+
+// 3-4 examples for every non-tense lesson
+const extraExamples = {
+parts: {
+"Noun":[["Karim is a farmer.","বাংলা: করিম একজন কৃষক।"],["The school is near my house.","বাংলা: স্কুলটি আমার বাড়ির কাছে।"],["Honesty is a great virtue.","বাংলা: সততা একটি মহান গুণ।"]],
+"Pronoun":[["He is my friend.","বাংলা: সে আমার বন্ধু।"],["They are playing cricket.","বাংলা: তারা ক্রিকেট খেলছে।"],["This is my book.","বাংলা: এটি আমার বই।"]],
+"Verb":[["Birds fly in the sky.","বাংলা: পাখিরা আকাশে উড়ে।"],["She writes a letter.","বাংলা: সে একটি চিঠি লেখে।"],["We study English.","বাংলা: আমরা ইংরেজি পড়ি।"]],
+"Adjective":[["He is a good boy.","বাংলা: সে একজন ভালো ছেলে।"],["It is a beautiful flower.","বাংলা: এটি একটি সুন্দর ফুল।"],["I have three books.","বাংলা: আমার তিনটি বই আছে।"]],
+"Adverb":[["He runs quickly.","বাংলা: সে দ্রুত দৌড়ায়।"],["She speaks softly.","বাংলা: সে আস্তে কথা বলে।"],["They worked carefully.","বাংলা: তারা সাবধানে কাজ করেছিল।"]],
+"Preposition":[["The book is on the table.","বাংলা: বইটি টেবিলের ওপর আছে।"],["He lives in Dhaka.","বাংলা: সে ঢাকায় থাকে।"],["The cat is under the chair.","বাংলা: বিড়ালটি চেয়ারের নিচে আছে।"]],
+"Conjunction":[["I like tea and coffee.","বাংলা: আমি চা এবং কফি পছন্দ করি।"],["He is poor but honest.","বাংলা: সে গরিব কিন্তু সৎ।"],["I stayed home because it rained.","বাংলা: বৃষ্টি হয়েছিল বলে আমি বাড়িতে ছিলাম।"]],
+"Interjection":[["Wow! What a beautiful view!","বাংলা: বাহ! কী সুন্দর দৃশ্য!"],["Hurrah! We won the match!","বাংলা: হুররে! আমরা ম্যাচটি জিতেছি!"],["Alas! He is dead!","বাংলা: হায়! সে মারা গেছে!"]]},
+voice: {
+"Active Voice":[["The boy opens the door.","বাংলা: ছেলেটি দরজা খোলে।"],["She cooks rice.","বাংলা: সে ভাত রান্না করে।"],["They clean the room.","বাংলা: তারা ঘরটি পরিষ্কার করে।"]],
+"Passive Voice":[["The door is opened by the boy.","বাংলা: দরজাটি ছেলেটির দ্বারা খোলা হয়।"],["Rice is cooked by her.","বাংলা: ভাতটি তার দ্বারা রান্না করা হয়।"],["The room is cleaned by them.","বাংলা: ঘরটি তাদের দ্বারা পরিষ্কার করা হয়।"]],
+"Simple Present":[["He writes a letter. → A letter is written by him.","বাংলা: সে একটি চিঠি লেখে। → একটি চিঠি তার দ্বারা লেখা হয়।"],["They clean the room. → The room is cleaned by them.","বাংলা: তারা ঘরটি পরিষ্কার করে। → ঘরটি তাদের দ্বারা পরিষ্কার করা হয়।"],["She reads the book. → The book is read by her.","বাংলা: সে বইটি পড়ে। → বইটি তার দ্বারা পড়া হয়।"]],
+"Simple Past":[["He wrote a letter. → A letter was written by him.","বাংলা: সে একটি চিঠি লিখেছিল। → একটি চিঠি তার দ্বারা লেখা হয়েছিল।"],["They cleaned the room. → The room was cleaned by them.","বাংলা: তারা ঘরটি পরিষ্কার করেছিল। → ঘরটি তাদের দ্বারা পরিষ্কার করা হয়েছিল।"],["She read the book. → The book was read by her.","বাংলা: সে বইটি পড়েছিল। → বইটি তার দ্বারা পড়া হয়েছিল।"]],
+"Simple Future":[["He will write a letter. → A letter will be written by him.","বাংলা: সে একটি চিঠি লিখবে। → একটি চিঠি তার দ্বারা লেখা হবে।"],["They will clean the room. → The room will be cleaned by them.","বাংলা: তারা ঘরটি পরিষ্কার করবে। → ঘরটি তাদের দ্বারা পরিষ্কার করা হবে।"],["She will read the book. → The book will be read by her.","বাংলা: সে বইটি পড়বে। → বইটি তার দ্বারা পড়া হবে।"]]},
+narration: {
+"Direct Speech":[["He said, “I am tired.”","বাংলা: সে বলল, “আমি ক্লান্ত।”"],["She said, “I can swim.”","বাংলা: সে বলল, “আমি সাঁতার কাটতে পারি।”"],["Rahim said, “I will go.”","বাংলা: রহিম বলল, “আমি যাব।”"]],
+"Indirect Speech":[["He said that he was tired.","বাংলা: সে বলল যে সে ক্লান্ত ছিল।"],["She said that she could swim.","বাংলা: সে বলল যে সে সাঁতার কাটতে পারত।"],["Rahim said that he would go.","বাংলা: রহিম বলল যে সে যাবে।"]],
+"Pronoun Change":[["He said, “I am ready.” → He said that he was ready.","বাংলা: সে বলল, “আমি প্রস্তুত।” → সে বলল যে সে প্রস্তুত ছিল।"],["She said, “I like my book.” → She said that she liked her book.","বাংলা: সে বলল, “আমি আমার বই পছন্দ করি।” → সে বলল যে সে তার বই পছন্দ করত।"],["They said, “We are happy.” → They said that they were happy.","বাংলা: তারা বলল, “আমরা খুশি।” → তারা বলল যে তারা খুশি ছিল।"]],
+"Tense Change":[["am → was","বাংলা: am → was (আছি → ছিলাম)"],["have → had","বাংলা: have → had (আছে/আছে আমার → ছিল)"],["will → would","বাংলা: will → would (করবে → করত/করবে বলে প্রকাশ) "]],
+"Time Word Change":[["today → that day","বাংলা: today → that day (আজ → সেদিন)"],["tomorrow → the next day","বাংলা: tomorrow → the next day (আগামীকাল → পরের দিন)"],["yesterday → the previous day","বাংলা: yesterday → the previous day (গতকাল → আগের দিন)"]]},
+article: {
+"A":[["I saw a dog.","বাংলা: আমি একটি কুকুর দেখেছিলাম।"],["He is a teacher.","বাংলা: সে একজন শিক্ষক।"],["She bought a pen.","বাংলা: সে একটি কলম কিনেছিল।"]],
+"An":[["She ate an apple.","বাংলা: সে একটি আপেল খেয়েছিল।"],["He is an honest man.","বাংলা: সে একজন সৎ মানুষ।"],["I saw an elephant.","বাংলা: আমি একটি হাতি দেখেছিলাম।"]],
+"The":[["The sun is hot.","বাংলা: সূর্য গরম।"],["The book on the table is mine.","বাংলা: টেবিলের ওপরের বইটি আমার।"],["The moon shines at night.","বাংলা: রাতে চাঁদ আলো দেয়।"]],
+"Zero Article":[["Books are useful.","বাংলা: বই উপকারী।"],["Water is essential.","বাংলা: পানি অপরিহার্য।"],["Milk is good for health.","বাংলা: দুধ স্বাস্থ্যের জন্য ভালো।"]]},
+preposition: {
+"In":[["He lives in Dhaka.","বাংলা: সে ঢাকায় থাকে।"],["She was born in 2010.","বাংলা: সে ২০১০ সালে জন্মগ্রহণ করেছিল।"],["We travel in December.","বাংলা: আমরা ডিসেম্বর মাসে ভ্রমণ করি।"]],
+"On":[["The book is on the table.","বাংলা: বইটি টেবিলের ওপর আছে।"],["We will meet on Monday.","বাংলা: আমরা সোমবার দেখা করব।"],["He was born on 5 May.","বাংলা: সে ৫ মে জন্মগ্রহণ করেছিল।"]],
+"At":[["The class starts at 9 AM.","বাংলা: ক্লাস সকাল ৯টায় শুরু হয়।"],["She is at home.","বাংলা: সে বাড়িতে আছে।"],["Meet me at the station.","বাংলা: স্টেশনে আমার সঙ্গে দেখা করো।"]],
+"From / To":[["I went from Dhaka to Chittagong.","বাংলা: আমি ঢাকা থেকে চট্টগ্রামে গিয়েছিলাম।"],["The train runs from Dhaka to Sylhet.","বাংলা: ট্রেনটি ঢাকা থেকে সিলেট পর্যন্ত চলে।"],["He walked from home to school.","বাংলা: সে বাড়ি থেকে হেঁটে স্কুলে গিয়েছিল।"]],
+"By":[["The letter was written by him.","বাংলা: চিঠিটি তার দ্বারা লেখা হয়েছিল।"],["Finish the work by 5 PM.","বাংলা: বিকেল ৫টার মধ্যে কাজটি শেষ করো।"],["We travelled by bus.","বাংলা: আমরা বাসে ভ্রমণ করেছি।"]]},
+rightform: {
+"Present Indefinite":[["He goes to school.","বাংলা: সে স্কুলে যায়।"],["They play football.","বাংলা: তারা ফুটবল খেলে।"],["She reads books.","বাংলা: সে বই পড়ে।"]],
+"Present Continuous":[["I am reading.","বাংলা: আমি পড়ছি।"],["She is cooking.","বাংলা: সে রান্না করছে।"],["They are playing.","বাংলা: তারা খেলছে।"]],
+"Past Indefinite":[["He went home.","বাংলা: সে বাড়ি গিয়েছিল।"],["She wrote a letter.","বাংলা: সে একটি চিঠি লিখেছিল।"],["They played cricket.","বাংলা: তারা ক্রিকেট খেলেছিল।"]],
+"Perfect":[["I have finished the work.","বাংলা: আমি কাজটি শেষ করেছি।"],["She has eaten lunch.","বাংলা: সে দুপুরের খাবার খেয়েছে।"],["They had left before noon.","বাংলা: তারা দুপুরের আগেই চলে গিয়েছিল।"]],
+"Modal":[["He can swim.","বাংলা: সে সাঁতার কাটতে পারে।"],["You should study.","বাংলা: তোমার পড়াশোনা করা উচিত।"],["We must obey the rules.","বাংলা: আমাদের অবশ্যই নিয়ম মেনে চলতে হবে।"]]},
+transformation: {
+"Affirmative → Negative":[["He is honest. → He is not dishonest.","বাংলা: সে সৎ। → সে অসৎ নয়।"],["Everyone likes flowers. → There is nobody who does not like flowers.","বাংলা: সবাই ফুল পছন্দ করে। → এমন কেউ নেই যে ফুল পছন্দ করে না।"],["She is happy. → She is not unhappy.","বাংলা: সে সুখী। → সে অসুখী নয়।"]],
+"Assertive → Interrogative":[["Everybody loves flowers. → Who does not love flowers?","বাংলা: সবাই ফুল ভালোবাসে। → কে ফুল ভালোবাসে না?"],["He is a good boy. → Is he not a good boy?","বাংলা: সে একজন ভালো ছেলে। → সে কি ভালো ছেলে নয়?"],["Everyone knows him. → Who does not know him?","বাংলা: সবাই তাকে চেনে। → কে তাকে চেনে না?"]],
+"Exclamatory → Assertive":[["What a beautiful flower! → It is a very beautiful flower.","বাংলা: কী সুন্দর ফুল! → এটি একটি খুব সুন্দর ফুল।"],["How nice the girl is! → The girl is very nice.","বাংলা: মেয়েটি কত সুন্দর! → মেয়েটি খুব সুন্দর।"],["Alas! He is dead! → It is sad that he is dead.","বাংলা: হায়! সে মারা গেছে! → এটা দুঃখের বিষয় যে সে মারা গেছে।"]],
+"Degree Change":[["Rahim is the tallest boy. → No other boy is as tall as Rahim.","বাংলা: রহিম সবচেয়ে লম্বা ছেলে। → রহিমের মতো লম্বা আর কোনো ছেলে নেই।"],["Karim is taller than Ali. → Ali is not as tall as Karim.","বাংলা: করিম আলীর চেয়ে লম্বা। → আলী করিমের মতো লম্বা নয়।"],["Dhaka is one of the biggest cities. → Very few cities are as big as Dhaka.","বাংলা: ঢাকা সবচেয়ে বড় শহরগুলোর একটি। → খুব কম শহরই ঢাকার মতো বড়।"]]},
+tag: {
+"Affirmative Statement":[["He is a student, isn't he?","বাংলা: সে একজন ছাত্র, তাই না?"],["They are ready, aren't they?","বাংলা: তারা প্রস্তুত, তাই না?"],["She can swim, can't she?","বাংলা: সে সাঁতার কাটতে পারে, তাই না?"]],
+"Negative Statement":[["He isn't a student, is he?","বাংলা: সে ছাত্র নয়, তাই তো?"],["They don't play, do they?","বাংলা: তারা খেলে না, তাই তো?"],["She can't swim, can she?","বাংলা: সে সাঁতার কাটতে পারে না, তাই তো?"]],
+"Auxiliary Matching":[["She can swim, can't she?","বাংলা: সে সাঁতার কাটতে পারে, তাই না?"],["He has finished, hasn't he?","বাংলা: সে শেষ করেছে, তাই না?"],["They were late, weren't they?","বাংলা: তারা দেরি করেছিল, তাই না?"]],
+"Simple Present":[["He plays cricket, doesn't he?","বাংলা: সে ক্রিকেট খেলে, তাই না?"],["She reads books, doesn't she?","বাংলা: সে বই পড়ে, তাই না?"],["They work hard, don't they?","বাংলা: তারা কঠোর পরিশ্রম করে, তাই না?"]],
+"Simple Past":[["They went home, didn't they?","বাংলা: তারা বাড়ি গিয়েছিল, তাই না?"],["He played well, didn't he?","বাংলা: সে ভালো খেলেছিল, তাই না?"],["She saw him, didn't she?","বাংলা: সে তাকে দেখেছিল, তাই না?"]]},
+completing: {
+"If":[["If you work hard, you will succeed.","বাংলা: তুমি কঠোর পরিশ্রম করলে সফল হবে।"],["If it rains, we will stay home.","বাংলা: বৃষ্টি হলে আমরা বাড়িতে থাকব।"],["If I were rich, I would help the poor.","বাংলা: আমি ধনী হলে গরিবদের সাহায্য করতাম।"]],
+"Unless":[["Unless you hurry, you will miss the bus.","বাংলা: তুমি তাড়াতাড়ি না করলে বাসটি মিস করবে।"],["Unless he studies, he will fail.","বাংলা: সে পড়াশোনা না করলে ফেল করবে।"],["Unless you obey the rules, you may be punished.","বাংলা: তুমি নিয়ম না মানলে শাস্তি পেতে পারো।"]],
+"Though / Although":[["Though he is poor, he is honest.","বাংলা: সে গরিব হলেও সৎ।"],["Although it was raining, we went out.","বাংলা: বৃষ্টি হলেও আমরা বাইরে গিয়েছিলাম।"],["Though she is young, she is wise.","বাংলা: সে তরুণী হলেও জ্ঞানী।"]],
+"So that":[["He works hard so that he can succeed.","বাংলা: সে কঠোর পরিশ্রম করে যাতে সে সফল হতে পারে।"],["She studies so that she can pass.","বাংলা: সে পড়াশোনা করে যাতে সে পাস করতে পারে।"],["He saved money so that he could buy a bicycle.","বাংলা: সে টাকা জমিয়েছিল যাতে সে একটি সাইকেল কিনতে পারে।"]],
+"It is time":[["It is time we went home.","বাংলা: এখন আমাদের বাড়ি যাওয়ার সময় হয়েছে।"],["It is time you started your work.","বাংলা: এখন তোমার কাজ শুরু করার সময় হয়েছে।"],["It is time they left the place.","বাংলা: এখন তাদের জায়গাটি ছেড়ে যাওয়ার সময় হয়েছে।"]]}
+};
+function renderTopic(id){
+ const t=topics.find(x=>x.id===id),p=getProgress(id);
+ let h=`<div class="score">📊 ${t.title} Today's Progress: ${p.done} / ${p.total}</div><div class="card"><h2>${t.name}</h2><p class="subtitle">${t.short}</p></div>`;
+ t.lessons.forEach((x,i)=>{
+ const ex=(extraExamples[id]&&extraExamples[id][x[0]])||[x[2]];
+ h+=`<div class="card"><h2>${i+1}. ${x[0]}</h2><p>${x[1]}</p>`;
+ ex.forEach((e,n)=>{
+   const en=Array.isArray(e)?e[0]:e;
+   const bn=Array.isArray(e)?e[1]:"";
+   h+=`<div class="example"><b>Example ${n+1}</b><div>${en}</div>${bn?`<span class="bn">${bn}</span>`:""}</div>`;
+  });
+ h+=`</div>`;
+});
+ document.getElementById("detailContent").innerHTML=h;
+ document.querySelector("#detail .home-btn").innerText="🎯 Practice This Topic";
+}
+function showDetail(){
+ document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.add("hidden");document.getElementById("home").classList.add("hidden");document.getElementById("detail").classList.remove("hidden");
+ if(currentTopic==="tense")openTense(currentTense);else renderTopic(currentTopic);
+}
+function goHome(){document.getElementById("detail").classList.add("hidden");document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.add("hidden");document.getElementById("home").classList.remove("hidden");loadHome();}
+function questions(){return currentTopic==="tense"?tenses[currentTense].questions:topics.find(x=>x.id===currentTopic).questions;}
+function startQuiz(){currentQuestion=0;score=0;answered=false;document.getElementById("detail").classList.add("hidden");document.getElementById("result").classList.add("hidden");document.getElementById("quiz").classList.remove("hidden");showQuestion();}
+function showQuestion(){
+ answered=false;const q=questions()[currentQuestion];
+ document.getElementById("questionNumber").innerText=`Question ${currentQuestion+1} of ${questions().length}`;
+ document.getElementById("questionText").innerText=q[0];document.getElementById("quizScore").innerText=`Score: ${score}`;
+ document.getElementById("answerMessage").innerText="";document.getElementById("nextBtn").classList.add("hidden");
+ const o=document.getElementById("options");o.innerHTML="";
+ q[1].forEach((x,i)=>{const b=document.createElement("button");b.className="quiz-option";b.innerText=`${String.fromCharCode(65+i)}. ${x}`;b.onclick=()=>checkAnswer(i,b);o.appendChild(b);});
+}
+function checkAnswer(i,b){
+ if(answered)return;answered=true;const q=questions()[currentQuestion];
+ document.querySelectorAll(".quiz-option").forEach((x,n)=>{if(n===q[2])x.classList.add("correct");});
+ if(i===q[2]){
+ score++;
+ const qid=currentTopic==="tense"?(`tense_${currentTense}_${currentQuestion}`):String(currentQuestion);
+ markCorrect(currentTopic,qid);
+ document.getElementById("answerMessage").innerHTML="✅ Correct! খুব ভালো!";
+ }
+ else{b.classList.add("wrong");document.getElementById("answerMessage").innerHTML=`❌ Wrong! সঠিক উত্তর: <b>${q[1][q[2]]}</b>`;}
+ document.getElementById("quizScore").innerText=`Score: ${score}`;document.getElementById("nextBtn").classList.remove("hidden");
+}
+function nextQuestion(){currentQuestion++;if(currentQuestion>=questions().length)showResult();else showQuestion();}
+function showResult(){
+ document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+ const total=questions().length;document.getElementById("finalScore").innerText=`🏆 Your Score: ${score} / ${total}`;
+ document.getElementById("resultMessage").innerText=score===total?"🎉 অসাধারণ! সবগুলো উত্তর সঠিক হয়েছে!":score>=total/2?"👏 খুব ভালো! আরও একটু Practice করলে আরও ভালো হবে।":"💪 চিন্তা করবেন না। নিয়মগুলো আবার পড়ুন এবং Try Again করুন।";
+
+}
+window.onload=loadHome;
+
+</script>
+</body>
+</html>
